@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Vault | Luxury Logistics</title>
+    <title>Elite Vault | Luxury Automotive</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; --border: #222; }
+        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; --zenora-blue: #007bff; }
         body { background: var(--black); color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; }
         
         /* Modals & Overlays */
@@ -14,27 +14,34 @@
         #spec-overlay { background: rgba(0,0,0,0.95); display: none; }
         
         .box { background: var(--dark); padding: 40px; border: 1px solid var(--gold); width: 100%; max-width: 400px; text-align: center; border-radius: 4px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid var(--border); color: white; border-radius: 4px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #222; color: white; border-radius: 4px; box-sizing: border-box; }
         
         button, .tally-btn { width: 100%; padding: 12px; background: var(--gold); border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; color: black; text-decoration: none; display: block; }
-        button:hover { filter: brightness(1.2); }
-
+        
         /* Main UI */
-        header { padding: 20px 5%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        header { padding: 20px 5%; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
         .hidden { display: none !important; }
 
-        /* Admin Form */
-        .admin-portal { background: #0a0a0a; padding: 30px; border: 1px solid var(--gold); margin-bottom: 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
-        .admin-portal h2 { grid-column: 1 / -1; margin: 0 0 10px 0; color: var(--gold); font-weight: 200; letter-spacing: 2px; }
+        /* About Section */
+        .about-section { text-align: center; margin-bottom: 50px; padding: 20px; border-bottom: 1px solid #222; }
+        .about-section p { color: #aaa; max-width: 700px; margin: 10px auto; line-height: 1.6; }
 
+        /* Admin Portal */
+        .admin-portal { background: #0a0a0a; padding: 30px; border: 1px solid var(--gold); margin-bottom: 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
+        
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
-        .car-card { background: var(--dark); border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
+        .car-card { background: var(--dark); border: 1px solid #222; transition: 0.3s; cursor: pointer; border-radius: 8px; overflow: hidden; }
         .car-card:hover { border-color: var(--gold); transform: translateY(-5px); }
         .car-info { padding: 20px; }
         
-        /* Specs */
+        /* Branding & Watermark */
+        .zenora-brand { color: var(--zenora-blue); font-weight: bold; }
+        footer { text-align: center; padding: 40px; color: #555; font-size: 0.9rem; }
+        footer a { color: var(--zenora-blue); text-decoration: none; }
+
+        /* Specs Table */
         .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
         .spec-label { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; }
     </style>
@@ -46,7 +53,7 @@
         <h2 style="color:var(--gold); letter-spacing:4px;">ELITE VAULT</h2>
         <input type="text" id="user" placeholder="Username">
         <input type="password" id="pass" placeholder="Password">
-        <button onclick="login()">Authorize</button>
+        <button onclick="login()">Authorize Access</button>
         <p style="font-size: 0.7rem; color: #444; margin-top: 15px;">Admin: admin/admin | Customer: Leave Blank</p>
     </div>
 </div>
@@ -62,23 +69,32 @@
 
 <div id="app" class="hidden">
     <header>
-        <h2 style="color:var(--gold); margin:0; letter-spacing:2px;">ELITE VAULT</h2>
+        <h2 style="margin:0; letter-spacing:2px;">ELITE <span class="zenora-brand">ZENORA</span> VAULT</h2>
         <button onclick="location.reload()" style="width:auto; padding: 5px 15px; background:transparent; color:#666; border:1px solid #333;">Logout</button>
     </header>
 
     <div class="container">
+        <div class="about-section">
+            <h2 style="color: var(--gold); font-weight: 300;">Certified Luxury Heritage</h2>
+            <p>At Elite Vault, we specialize in the procurement and sale of <strong>certified second-hand luxury vehicles</strong>. Every unit in our collection undergoes a rigorous multi-point inspection to ensure mechanical perfection and aesthetic excellence. Own your dream with total confidence.</p>
+        </div>
+
         <div id="admin-section" class="admin-portal hidden">
-            <h2>VEHICLE INTAKE</h2>
+            <h2 style="grid-column: 1/-1; color: var(--gold);">VEHICLE INTAKE</h2>
             <div><label><small>Brand</small></label><input type="text" id="m-make"></div>
             <div><label><small>Model</small></label><input type="text" id="m-model"></div>
             <div><label><small>Year</small></label><input type="number" id="m-year"></div>
-            <div><label><small>Price</small></label><input type="number" id="m-price"></div>
-            <button onclick="addCar()">Add to Vault</button>
+            <div><label><small>Price (INR)</small></label><input type="number" id="m-price"></div>
+            <button onclick="addCar()">Add to Collection</button>
         </div>
 
-        <h1 style="font-weight: 200; letter-spacing: 1px;">CURRENT INVENTORY</h1>
+        <h1 style="font-weight: 200; letter-spacing: 1px;">VAULT INVENTORY</h1>
         <div id="inventory-grid" class="grid"></div>
     </div>
+
+    <footer>
+        <p>Coded with ❤️ by <a href="https://zenora-ai.vercel.app/" target="_blank">Zenora-AI</a></p>
+    </footer>
 </div>
 
 <script>
@@ -109,8 +125,8 @@
                 <div style="height:200px; background:#151515; display:flex; align-items:center; justify-content:center; font-size:3rem;">🏎️</div>
                 <div class="car-info">
                     <h3 style="color:var(--gold); margin:0;">${car.make} ${car.model}</h3>
-                    <p style="color:#888;">${car.year} | $${Number(car.price).toLocaleString()}</p>
-                    ${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar('${car.id}')" style="background:#300; color:red; margin-top:10px; padding:5px; font-size:0.7rem;">Delete</button>` : ''}
+                    <p style="color:#888;">${car.year} | <span style="color:white;">₹${Number(car.price).toLocaleString('en-IN')}</span></p>
+                    ${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar('${car.id}')" style="background:#300; color:red; margin-top:10px; padding:5px; font-size:0.7rem; border:1px solid red;">Remove Asset</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -132,23 +148,25 @@
     }
 
     async function deleteCar(id) {
-        await _supabase.from('inventory').delete().eq('id', id);
-        load();
+        if(confirm("Confirm removal from vault?")) {
+            await _supabase.from('inventory').delete().eq('id', id);
+            load();
+        }
     }
 
     function openSpecs(make, model, year, price) {
         document.getElementById('s-title').innerText = `${make} ${model}`;
-        document.getElementById('s-sub').innerText = `${year} Asset | Valuation: $${Number(price).toLocaleString()}`;
+        document.getElementById('s-sub').innerText = `${year} Model | Valuation: ₹${Number(price).toLocaleString('en-IN')}`;
         
-        // Dynamic Specs based on Brand
-        let engine = "V8 Twin-Turbo"; let hp = "600 HP";
-        if(make.toLowerCase().includes('lambo')) { engine = "6.5L V12"; hp = "770 HP"; }
-        if(make.toLowerCase().includes('ferrari')) { engine = "V8 Hybrid"; hp = "986 HP"; }
+        let engine = "V8 Turbocharged"; let hp = "550+ HP";
+        if(make.toLowerCase().includes('lambo')) { engine = "6.5L V12 Natural"; hp = "770 HP"; }
+        if(make.toLowerCase().includes('ferrari')) { engine = "V8 Hybrid-Electric"; hp = "986 HP"; }
 
         document.getElementById('s-list').innerHTML = `
             <div class="spec-row"><span class="spec-label">Engine</span><span>${engine}</span></div>
-            <div class="spec-row"><span class="spec-label">Output</span><span>${hp}</span></div>
-            <div class="spec-row"><span class="spec-label">Transmission</span><span>Auto-Shift</span></div>
+            <div class="spec-row"><span class="spec-label">Performance</span><span>${hp}</span></div>
+            <div class="spec-row"><span class="spec-label">Transmission</span><span>Paddle-Shift Auto</span></div>
+            <div class="spec-row"><span class="spec-label">Certification</span><span>Certified Pre-Owned</span></div>
         `;
         document.getElementById('spec-overlay').style.display = 'flex';
     }
