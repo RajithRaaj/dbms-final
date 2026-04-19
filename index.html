@@ -3,130 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Vault | Luxury Automotive</title>
+    <title>Elite Vault | Luxury Logistics</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; }
-        body { background: var(--black); color: var(--white); font-family: 'Inter', sans-serif; margin: 0; }
+        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; --border: #222; }
+        body { background: var(--black); color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; }
         
-        /* Modal - Specs Sheet */
-        #spec-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            display: none; align-items: center; justify-content: center; z-index: 9999;
-        }
-        .spec-sheet {
-            background: #0a0a0a; border: 1px solid var(--gold); width: 90%; max-width: 500px;
-            padding: 30px; position: relative; border-radius: 4px;
-        }
-        .spec-row { 
-            display: flex; justify-content: space-between; padding: 12px 0; 
-            border-bottom: 1px solid #222; font-size: 0.9rem;
-        }
-        .spec-label { color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        /* Modals & Overlays */
+        #login-overlay, #spec-overlay { position: fixed; inset: 0; background: var(--black); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        #spec-overlay { background: rgba(0,0,0,0.95); display: none; }
+        
+        .box { background: var(--dark); padding: 40px; border: 1px solid var(--gold); width: 100%; max-width: 400px; text-align: center; border-radius: 4px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid var(--border); color: white; border-radius: 4px; box-sizing: border-box; }
+        
+        button, .tally-btn { width: 100%; padding: 12px; background: var(--gold); border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; color: black; text-decoration: none; display: block; }
+        button:hover { filter: brightness(1.2); }
 
-        /* Buy Button (Tally Link) */
-        .tally-link {
-            display: block; background: var(--gold); color: black; text-align: center;
-            padding: 15px; margin-top: 25px; text-decoration: none; font-weight: bold;
-            letter-spacing: 1px; transition: 0.3s;
-        }
-        .tally-link:hover { filter: brightness(1.2); }
-
-        /* Dashboard & Grid */
-        header { padding: 30px; text-align: center; border-bottom: 1px solid #222; }
+        /* Main UI */
+        header { padding: 20px 5%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .car-card { 
-            background: var(--dark); border: 1px solid #222; border-radius: 8px; 
-            overflow: hidden; cursor: pointer; transition: 0.3s;
-        }
+        .hidden { display: none !important; }
+
+        /* Admin Form */
+        .admin-portal { background: #0a0a0a; padding: 30px; border: 1px solid var(--gold); margin-bottom: 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
+        .admin-portal h2 { grid-column: 1 / -1; margin: 0 0 10px 0; color: var(--gold); font-weight: 200; letter-spacing: 2px; }
+
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .car-card { background: var(--dark); border: 1px solid var(--border); transition: 0.3s; cursor: pointer; }
         .car-card:hover { border-color: var(--gold); transform: translateY(-5px); }
         .car-info { padding: 20px; }
         
-        .close-btn { position: absolute; top: 15px; right: 20px; color: var(--gold); cursor: pointer; font-size: 1.2rem; }
-        .hidden { display: none; }
+        /* Specs */
+        .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
+        .spec-label { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<div id="spec-overlay">
-    <div class="spec-sheet">
-        <span class="close-btn" onclick="closeSpecs()">✕</span>
-        <h2 id="view-title" style="margin-top:0; color:var(--gold)"></h2>
-        <p id="view-subtitle" style="color:#666; margin-bottom:20px;"></p>
-        
-        <div id="spec-list">
-            </div>
-
-        <a href="https://tally.so/r/J9kead" target="_blank" class="tally-link">ACQUIRE THIS VEHICLE</a>
+<div id="login-overlay">
+    <div class="box">
+        <h2 style="color:var(--gold); letter-spacing:4px;">ELITE VAULT</h2>
+        <input type="text" id="user" placeholder="Username">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="login()">Authorize</button>
+        <p style="font-size: 0.7rem; color: #444; margin-top: 15px;">Admin: admin/admin | Customer: Leave Blank</p>
     </div>
 </div>
 
-<header>
-    <h1 style="color:var(--gold); letter-spacing:5px; margin:0;">ELITE VAULT</h1>
-</header>
+<div id="spec-overlay" onclick="this.style.display='none'">
+    <div class="box" onclick="event.stopPropagation()" style="max-width: 500px; text-align: left;">
+        <h2 id="s-title" style="color:var(--gold); margin:0;"></h2>
+        <p id="s-sub" style="color:#666;"></p>
+        <div id="s-list" style="margin: 20px 0;"></div>
+        <a href="https://tally.so/r/J9kead" target="_blank" class="tally-btn">REACH OUT TO ACQUIRE</a>
+    </div>
+</div>
 
-<div class="container">
-    <div id="inventory-grid" class="grid"></div>
+<div id="app" class="hidden">
+    <header>
+        <h2 style="color:var(--gold); margin:0; letter-spacing:2px;">ELITE VAULT</h2>
+        <button onclick="location.reload()" style="width:auto; padding: 5px 15px; background:transparent; color:#666; border:1px solid #333;">Logout</button>
+    </header>
+
+    <div class="container">
+        <div id="admin-section" class="admin-portal hidden">
+            <h2>VEHICLE INTAKE</h2>
+            <div><label><small>Brand</small></label><input type="text" id="m-make"></div>
+            <div><label><small>Model</small></label><input type="text" id="m-model"></div>
+            <div><label><small>Year</small></label><input type="number" id="m-year"></div>
+            <div><label><small>Price</small></label><input type="number" id="m-price"></div>
+            <button onclick="addCar()">Add to Vault</button>
+        </div>
+
+        <h1 style="font-weight: 200; letter-spacing: 1px;">CURRENT INVENTORY</h1>
+        <div id="inventory-grid" class="grid"></div>
+    </div>
 </div>
 
 <script>
-    // Your Connection
     const SB_URL = "https://jzenwyfveijwnmppsnyj.supabase.co";
     const SB_KEY = "sb_publishable_fOQPV3iQwMaqbOaHAk1BKw__SAM9Fad";
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    async function fetchInventory() {
-        const { data, error } = await _supabase.from('inventory').select('*');
-        if (error) return console.error(error);
+    let isAdmin = false;
 
-        const grid = document.getElementById('inventory-grid');
-        grid.innerHTML = data.map(car => `
+    function login() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === 'admin' && p === 'admin') {
+            isAdmin = true;
+            document.getElementById('admin-section').classList.remove('hidden');
+        }
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        load();
+    }
+
+    async function load() {
+        const { data, error } = await _supabase.from('inventory').select('*').order('created_at', {ascending: false});
+        if(error) return;
+
+        document.getElementById('inventory-grid').innerHTML = data.map(car => `
             <div class="car-card" onclick="openSpecs('${car.make}', '${car.model}', '${car.year}', '${car.price}')">
-                <div style="height:180px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; font-size:3rem;">🏎️</div>
+                <div style="height:200px; background:#151515; display:flex; align-items:center; justify-content:center; font-size:3rem;">🏎️</div>
                 <div class="car-info">
-                    <h3 style="margin:0; color:var(--gold)">${car.make} ${car.model}</h3>
-                    <p style="margin:5px 0; color:#888;">Year: ${car.year}</p>
-                    <div style="font-weight:bold; color:var(--gold)">$${Number(car.price).toLocaleString()}</div>
-                    <p style="font-size:0.7rem; color:#555; margin-top:10px;">CLICK FOR FULL SPECS</p>
+                    <h3 style="color:var(--gold); margin:0;">${car.make} ${car.model}</h3>
+                    <p style="color:#888;">${car.year} | $${Number(car.price).toLocaleString()}</p>
+                    ${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar('${car.id}')" style="background:#300; color:red; margin-top:10px; padding:5px; font-size:0.7rem;">Delete</button>` : ''}
                 </div>
             </div>
         `).join('');
     }
 
-    function openSpecs(make, model, year, price) {
-        document.getElementById('view-title').innerText = `${make} ${model}`;
-        document.getElementById('view-subtitle').innerText = `${year} Edition | Valuation: $${Number(price).toLocaleString()}`;
-        
-        // Custom logic: if it's a specific brand, show specific specs
-        let engine = "V8 Twin-Turbo";
-        let power = "650 HP";
-        let topSpeed = "205 MPH";
+    async function addCar() {
+        const make = document.getElementById('m-make').value;
+        const model = document.getElementById('m-model').value;
+        const year = document.getElementById('m-year').value;
+        const price = document.getElementById('m-price').value;
 
-        if(make.toLowerCase().includes('lamborghini')) {
-            engine = "6.5L V12"; power = "770 HP"; topSpeed = "217 MPH";
-        } else if(make.toLowerCase().includes('ferrari')) {
-            engine = "4.0L V8 Hybrid"; power = "986 HP"; topSpeed = "211 MPH";
+        const { error } = await _supabase.from('inventory').insert([{ make, model, year, price }]);
+        if(error) alert(error.message);
+        else {
+            document.getElementById('m-make').value = '';
+            document.getElementById('m-model').value = '';
+            load();
         }
+    }
 
-        const list = document.getElementById('spec-list');
-        list.innerHTML = `
+    async function deleteCar(id) {
+        await _supabase.from('inventory').delete().eq('id', id);
+        load();
+    }
+
+    function openSpecs(make, model, year, price) {
+        document.getElementById('s-title').innerText = `${make} ${model}`;
+        document.getElementById('s-sub').innerText = `${year} Asset | Valuation: $${Number(price).toLocaleString()}`;
+        
+        // Dynamic Specs based on Brand
+        let engine = "V8 Twin-Turbo"; let hp = "600 HP";
+        if(make.toLowerCase().includes('lambo')) { engine = "6.5L V12"; hp = "770 HP"; }
+        if(make.toLowerCase().includes('ferrari')) { engine = "V8 Hybrid"; hp = "986 HP"; }
+
+        document.getElementById('s-list').innerHTML = `
             <div class="spec-row"><span class="spec-label">Engine</span><span>${engine}</span></div>
-            <div class="spec-row"><span class="spec-label">Output</span><span>${power}</span></div>
-            <div class="spec-row"><span class="spec-label">Top Speed</span><span>${topSpeed}</span></div>
-            <div class="spec-row"><span class="spec-label">Transmission</span><span>Dual-Clutch</span></div>
-            <div class="spec-row"><span class="spec-label">Drive</span><span>All-Wheel Drive</span></div>
+            <div class="spec-row"><span class="spec-label">Output</span><span>${hp}</span></div>
+            <div class="spec-row"><span class="spec-label">Transmission</span><span>Auto-Shift</span></div>
         `;
-
         document.getElementById('spec-overlay').style.display = 'flex';
     }
-
-    function closeSpecs() {
-        document.getElementById('spec-overlay').style.display = 'none';
-    }
-
-    // Initial Load
-    fetchInventory();
 </script>
 </body>
 </html>
