@@ -4,200 +4,231 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elite Vault | Luxury Auto Logistics</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
-            --gold: #d4af37;
-            --black: #0a0a0a;
-            --dark-grey: #1c1c1c;
-            --white: #ffffff;
-            --accent: #2c2c2c;
+            --gold: #C5A059;
+            --black: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(197, 160, 89, 0.3);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--black);
-            color: var(--white);
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
-            padding: 0;
+            line-height: 1.6;
         }
 
+        /* Luxury Header */
         header {
-            background: linear-gradient(to right, var(--black), var(--dark-grey));
-            padding: 2rem;
-            border-bottom: 1px solid var(--gold);
+            padding: 4rem 2rem;
             text-align: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            border-bottom: 1px solid var(--border);
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 4px;
+        h1 {
             color: var(--gold);
+            font-size: 3rem;
+            letter-spacing: 8px;
             text-transform: uppercase;
+            margin: 0;
+            font-weight: 200;
         }
 
+        .subtitle {
+            color: #888;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        /* Dashboard Stats */
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: -40px auto 40px;
+            padding: 0 20px;
         }
 
-        .stats-bar {
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
         }
 
         .stat-card {
-            background: var(--dark-grey);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--gold);
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
             text-align: center;
         }
 
+        .stat-card h2 {
+            color: var(--gold);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* Inventory Grid */
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .car-card {
-            background: var(--accent);
-            border-radius: 12px;
+            background: #111;
+            border: 1px solid #222;
+            transition: all 0.4s ease;
+            position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease;
-            border: 1px solid #333;
         }
 
         .car-card:hover {
-            transform: translateY(-10px);
             border-color: var(--gold);
+            transform: translateY(-5px);
         }
 
-        .car-info {
-            padding: 1.5rem;
+        .car-image {
+            height: 200px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #222;
         }
 
-        .car-info h3 {
-            margin: 0 0 0.5rem 0;
+        .car-content {
+            padding: 20px;
+        }
+
+        .status-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border: 1px solid var(--gold);
             color: var(--gold);
+            display: inline-block;
+            margin-bottom: 15px;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            background: rgba(212, 175, 55, 0.2);
+        .price {
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .loader {
+            text-align: center;
+            color: var(--gold);
+            padding: 50px;
+            font-size: 1.2rem;
+        }
+
+        button {
+            background: transparent;
             color: var(--gold);
             border: 1px solid var(--gold);
+            padding: 10px 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-refresh {
+        button:hover {
             background: var(--gold);
             color: var(--black);
-            border: none;
-            padding: 0.8rem 2rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
         }
-
-        .btn-refresh:hover {
-            background: #b8962d;
-        }
-
-        #loading { text-align: center; font-style: italic; color: var(--gold); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Elite Vault</h1>
-        <p>Prestige Inventory Management</p>
+        <h1>ELITE VAULT</h1>
+        <div class="subtitle">PRESTIGE AUTOMOTIVE LOGISTICS</div>
     </header>
 
     <div class="container">
-        <div class="stats-bar">
+        <div class="stats">
             <div class="stat-card">
-                <small>Total Valuation</small>
-                <div id="valuation-total">$0.00</div>
+                <p>Vault Capacity</p>
+                <h2 id="total-count">0</h2>
             </div>
             <div class="stat-card">
-                <small>Vehicles in Vault</small>
-                <div id="car-count">0</div>
+                <p>Inventory Value</p>
+                <h2 id="total-value">$0</h2>
             </div>
         </div>
 
-        <button class="btn-refresh" onclick="fetchInventory()">Sync Inventory</button>
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button onclick="loadInventory()">Refresh Live Feed</button>
+        </div>
 
-        <div id="loading">Connecting to vault secure servers...</div>
-        
-        <div class="inventory-grid" id="inventory-grid">
-            </div>
+        <div id="loader" class="loader">Establishing Secure Connection...</div>
+        <div class="inventory-grid" id="inventory-list"></div>
     </div>
 
     <script>
-        // Supabase Configuration from your credentials
-        const SUPABASE_URL = 'https://jzenwyfveijwnmppsnyj.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_fOQPV3iQwMaqbOaHAk1BKw__SAM9Fad';
-        
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Supabase Initialization using your specific credentials
+        const SB_URL = "https://jzenwyfveijwnmppsnyj.supabase.co";
+        const SB_KEY = "sb_publishable_fOQPV3iQwMaqbOaHAk1BKw__SAM9Fad";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        async function fetchInventory() {
-            const grid = document.getElementById('inventory-grid');
-            const loading = document.getElementById('loading');
-            loading.style.display = 'block';
-            grid.innerHTML = '';
+        async function loadInventory() {
+            const listElement = document.getElementById('inventory-list');
+            const loader = document.getElementById('loader');
+            
+            loader.style.display = 'block';
+            listElement.innerHTML = '';
 
             try {
-                // Adjust 'cars' to your actual table name in Supabase
-                const { data, error } = await supabase
-                    .from('cars') 
-                    .select('*');
+                const { data, error } = await _supabase
+                    .from('inventory')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                loading.style.display = 'none';
-                
-                if (data.length === 0) {
-                    grid.innerHTML = '<p>Vault is currently empty.</p>';
-                }
+                loader.style.display = 'none';
+
+                let totalValue = 0;
 
                 data.forEach(car => {
-                    const card = document.createElement('div');
-                    card.className = 'car-card';
-                    card.innerHTML = `
-                        <div class="car-info">
-                            <span class="status-badge">${car.status || 'In Stock'}</span>
-                            <h3>${car.make} ${car.model}</h3>
-                            <p><strong>Year:</strong> ${car.year}</p>
-                            <p><strong>VIN:</strong> ${car.vin || 'N/A'}</p>
-                            <p style="color: var(--gold); font-size: 1.2rem; font-weight: bold;">
-                                $${Number(car.price).toLocaleString()}
-                            </p>
+                    totalValue += (car.price || 0);
+                    const card = `
+                        <div class="car-card">
+                            <div class="car-image">
+                                <span style="font-size: 3rem; opacity: 0.3;">🏎️</span>
+                            </div>
+                            <div class="car-content">
+                                <div class="status-tag">${car.status}</div>
+                                <h3>${car.year} ${car.make} ${car.model}</h3>
+                                <div class="price">$${Number(car.price).toLocaleString()}</div>
+                            </div>
                         </div>
                     `;
-                    grid.appendChild(card);
+                    listElement.innerHTML += card;
                 });
 
-                document.getElementById('car-count').innerText = data.length;
-                const total = data.reduce((sum, car) => sum + (car.price || 0), 0);
-                document.getElementById('valuation-total').innerText = `$${total.toLocaleString()}`;
+                // Update Stats
+                document.getElementById('total-count').innerText = data.length;
+                document.getElementById('total-value').innerText = `$${(totalValue / 1000000).toFixed(2)}M`;
 
             } catch (err) {
-                console.error('Error fetching data:', err);
-                loading.innerText = 'Access Denied: Check console for connection details.';
+                loader.innerHTML = "Access Denied: Connection to Vault Failed.";
+                console.error(err);
             }
         }
 
-        // Initial Load
-        window.onload = fetchInventory;
+        // Run on start
+        loadInventory();
     </script>
 </body>
 </html>
