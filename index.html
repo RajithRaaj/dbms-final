@@ -6,87 +6,107 @@
     <title>Elite Vault | Luxury Logistics</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; }
+        :root { --gold: #C5A059; --black: #050505; --dark: #111; --white: #fff; --border: #222; }
         body { background: var(--black); color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; }
         
-        /* Login UI */
-        #login-overlay {
-            position: fixed; inset: 0; background: var(--black); 
-            display: flex; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .login-box {
-            background: var(--dark); padding: 40px; border: 1px solid var(--gold);
-            text-align: center; width: 300px; border-radius: 8px;
-        }
-        input { 
-            width: 100%; padding: 10px; margin: 10px 0; background: #222; 
-            border: 1px solid #444; color: white; box-sizing: border-box;
-        }
-        button { 
-            width: 100%; padding: 12px; background: var(--gold); border: none; 
-            cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px;
-        }
+        /* Login Overlay */
+        #login-overlay { position: fixed; inset: 0; background: var(--black); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-box { background: var(--dark); padding: 40px; border: 1px solid var(--gold); text-align: center; width: 300px; border-radius: 8px; }
+        
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid var(--border); color: white; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--gold); border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
 
-        /* Layout */
-        header { padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .hidden { display: none !important; }
+        header { padding: 20px 5%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #080808; }
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .hidden { display: none !important; }
+
+        /* Form Styling */
+        .admin-form { background: var(--dark); padding: 25px; border: 1px solid var(--gold); border-radius: 8px; margin-bottom: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
+        .admin-form h3 { grid-column: 1 / -1; margin-top: 0; color: var(--gold); letter-spacing: 1px; }
 
         /* Customer Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .car-card { background: var(--dark); border-radius: 10px; overflow: hidden; border: 1px solid #222; }
-        .car-image { height: 180px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-        .car-info { padding: 20px; }
-        .car-info h3 { margin: 0; color: var(--gold); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        .car-card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: 0.4s; }
+        .car-card:hover { border-color: var(--gold); transform: translateY(-5px); }
+        .car-image { height: 200px; background: linear-gradient(45deg, #111, #1a1a1a); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+        .car-info { padding: 25px; }
+        .car-info h3 { margin: 0; font-size: 1.4rem; color: var(--gold); }
+        .status-badge { display: inline-block; padding: 4px 10px; border: 1px solid var(--gold); font-size: 0.7rem; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
 
         /* Admin Table */
-        table { width: 100%; border-collapse: collapse; background: var(--dark); }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #222; }
-        th { color: var(--gold); text-transform: uppercase; font-size: 0.8rem; }
-        .admin-controls { margin-bottom: 20px; display: flex; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; background: var(--dark); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 18px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #151515; color: var(--gold); font-size: 0.8rem; text-transform: uppercase; }
+        .btn-delete { background: #441111; color: #ff4444; border: 1px solid #661111; padding: 6px 12px; width: auto; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2 style="color: var(--gold)">ELITE VAULT</h2>
-        <p>Authentication Required</p>
+        <h2 style="color: var(--gold); letter-spacing: 4px;">ELITE VAULT</h2>
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="handleLogin()">Access Vault</button>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 15px;">Admin: admin / admin<br>Customer: leave blank</p>
+        <button onclick="handleLogin()">Authorize Entry</button>
+        <p style="color: #555; font-size: 0.7rem; margin-top: 15px;">Admin: admin/admin | Customer: Blank</p>
     </div>
 </div>
 
 <div id="app" class="hidden">
     <header>
-        <h2 style="color: var(--gold); letter-spacing: 2px;">ELITE VAULT</h2>
-        <div id="user-tag"></div>
-        <button onclick="location.reload()" style="width: auto; padding: 5px 15px; font-size: 0.7rem;">Logout</button>
+        <h2 style="color: var(--gold); margin:0;">ELITE VAULT</h2>
+        <button onclick="location.reload()" style="width:auto; padding: 8px 20px; background: transparent; border: 1px solid #444; color: #888;">Logout</button>
     </header>
 
-    <div id="customer-view" class="container hidden">
-        <h1 style="font-weight: 200;">Available Collection</h1>
-        <div id="inventory-grid" class="grid"></div>
-    </div>
-
     <div id="admin-view" class="container hidden">
-        <h1>Inventory Control</h1>
-        <div class="admin-controls">
-            <button onclick="addRandomCar()" style="width: auto;">+ Add High-End Unit</button>
+        <div class="admin-form">
+            <h3>Vehicle Intake Portal</h3>
+            <div>
+                <label><small>Brand (Make)</small></label>
+                <input type="text" id="add-make" placeholder="e.g. Porsche">
+            </div>
+            <div>
+                <label><small>Model</small></label>
+                <input type="text" id="add-model" placeholder="e.g. 911 Turbo S">
+            </div>
+            <div>
+                <label><small>Year</small></label>
+                <input type="number" id="add-year" placeholder="2026">
+            </div>
+            <div>
+                <label><small>Valuation ($)</small></label>
+                <input type="number" id="add-price" placeholder="250000">
+            </div>
+            <div>
+                <label><small>Status</small></label>
+                <select id="add-status">
+                    <option value="In Vault">In Vault</option>
+                    <option value="Available">Available</option>
+                    <option value="Reserved">Reserved</option>
+                    <option value="Sold">Sold</option>
+                </select>
+            </div>
+            <button onclick="addNewCar()">Register Vehicle</button>
         </div>
+
         <table>
             <thead>
                 <tr>
-                    <th>Vehicle</th>
-                    <th>Price</th>
+                    <th>Asset</th>
+                    <th>Year</th>
+                    <th>Valuation</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody id="admin-table-body"></tbody>
         </table>
+    </div>
+
+    <div id="customer-view" class="container hidden">
+        <h1 style="font-weight: 200; margin-bottom: 40px;">Current Collection</h1>
+        <div id="inventory-grid" class="grid"></div>
     </div>
 </div>
 
@@ -95,81 +115,80 @@
     const SB_KEY = "sb_publishable_fOQPV3iQwMaqbOaHAk1BKw__SAM9Fad";
     const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    let currentUser = 'customer';
+    let role = 'customer';
 
     function handleLogin() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-
-        if (user === 'admin' && pass === 'admin') {
-            currentUser = 'admin';
-            showView('admin-view');
-        } else {
-            currentUser = 'customer';
-            showView('customer-view');
-        }
-
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        if(u === 'admin' && p === 'admin') role = 'admin';
+        
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
-        document.getElementById('user-tag').innerText = `Role: ${currentUser.toUpperCase()}`;
-        loadData();
+        
+        if(role === 'admin') document.getElementById('admin-view').classList.remove('hidden');
+        else document.getElementById('customer-view').classList.remove('hidden');
+        
+        loadInventory();
     }
 
-    function showView(viewId) {
-        document.getElementById('customer-view').classList.add('hidden');
-        document.getElementById('admin-view').classList.add('hidden');
-        document.getElementById(viewId).classList.remove('hidden');
-    }
+    async function loadInventory() {
+        const { data, error } = await _supabase.from('inventory').select('*').order('created_at', {ascending: false});
+        if(error) return console.error(error);
 
-    async function loadData() {
-        const { data, error } = await _supabase.from('inventory').select('*');
-        if (error) return console.error(error);
+        // Render Admin Table
+        const tbody = document.getElementById('admin-table-body');
+        tbody.innerHTML = data.map(car => `
+            <tr>
+                <td><strong>${car.make}</strong> ${car.model}</td>
+                <td>${car.year}</td>
+                <td style="color: var(--gold)">$${Number(car.price).toLocaleString()}</td>
+                <td>${car.status}</td>
+                <td><button class="btn-delete" onclick="deleteCar('${car.id}')">Decommission</button></td>
+            </tr>
+        `).join('');
 
-        if (currentUser === 'admin') {
-            renderAdmin(data);
-        } else {
-            renderCustomer(data);
-        }
-    }
-
-    function renderCustomer(cars) {
+        // Render Customer Grid
         const grid = document.getElementById('inventory-grid');
-        grid.innerHTML = cars.map(car => `
+        grid.innerHTML = data.map(car => `
             <div class="car-card">
                 <div class="car-image">🏎️</div>
                 <div class="car-info">
+                    <div class="status-badge">${car.status}</div>
                     <h3>${car.make} ${car.model}</h3>
-                    <p>${car.year} | $${Number(car.price).toLocaleString()}</p>
-                    <button style="font-size: 0.8rem">View Details</button>
+                    <p style="color: #888">${car.year} | Prestige Class</p>
+                    <div style="font-size: 1.2rem; color: var(--gold); font-weight: bold;">$${Number(car.price).toLocaleString()}</div>
                 </div>
             </div>
         `).join('');
     }
 
-    function renderAdmin(cars) {
-        const tbody = document.getElementById('admin-table-body');
-        tbody.innerHTML = cars.map(car => `
-            <tr>
-                <td>${car.make} ${car.model} (${car.year})</td>
-                <td>$${Number(car.price).toLocaleString()}</td>
-                <td><span style="color:var(--gold)">${car.status}</span></td>
-                <td><button onclick="deleteCar('${car.id}')" style="background: #331111; color: #ff4444; border: 1px solid #441111; padding: 5px 10px;">Remove</button></td>
-            </tr>
-        `).join('');
-    }
+    async function addNewCar() {
+        const make = document.getElementById('add-make').value;
+        const model = document.getElementById('add-model').value;
+        const year = document.getElementById('add-year').value;
+        const price = document.getElementById('add-price').value;
+        const status = document.getElementById('add-status').value;
 
-    async function addRandomCar() {
+        if(!make || !model) return alert("Please enter Make and Model");
+
         const { error } = await _supabase.from('inventory').insert([
-            { make: 'Bugatti', model: 'Chiron', year: 2024, price: 3000000, status: 'In Vault' }
+            { make, model, year, price, status }
         ]);
-        if (error) alert(error.message);
-        else loadData();
+
+        if(error) alert(error.message);
+        else {
+            // Clear inputs
+            document.getElementById('add-make').value = '';
+            document.getElementById('add-model').value = '';
+            loadInventory();
+        }
     }
 
     async function deleteCar(id) {
+        if(!confirm("Are you sure you want to remove this vehicle from the vault?")) return;
         const { error } = await _supabase.from('inventory').delete().eq('id', id);
-        if (error) alert(error.message);
-        else loadData();
+        if(error) alert(error.message);
+        else loadInventory();
     }
 </script>
 </body>
